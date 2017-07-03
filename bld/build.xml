@@ -10,16 +10,9 @@
 	<property name="bld" value="${basedir}/bld" />
 	<property name="doc" value="${basedir}/doc" />
 	<property name="jar" value="${basedir}/jar" />
-	<property name="tst" value="${basedir}/tst" />
-	<property name="tests" value="net.scientifichooliganism.zookeeper.*" />
-	<property name="sql" value="${basedir}/sql" />
-	<property name="rsrc" value="${basedir}/rsrc" />
-	<property name="rslt" value="${basedir}/junit_results" />
 	<property name="info.txt" value="${basedir}/info.txt" />
 	<property name="jarbasename" value="zookeeper_demo" />
 	<property name="jarextension" value=".jar" />
-	<property name="warbasename" value="ROOT" />
-	<property name="warextension" value=".war" />
 	<!--ivy properties-->
 	<property name="ivy.version" value="2.4.0" />
 	<property name="ivy.lib" value="${lib}/ivy" />
@@ -30,8 +23,6 @@
 	<property name="sonar.language" value="java" />
 	<property name="sonar.sourceEncoding" value="UTF-8" />
 	<property name="sonar.sources" value="src" />
-	<property name="sonar.tests" value="tst" />
-	<property name="sonar.junit.reportsPath" value="junit_results" />
 
 	<condition property="is_ver_set" >
 		<isset property="app_vrsn" />
@@ -95,15 +86,13 @@
 
 	<target name="prep" description="">
 		<delete dir="${bin}" failonerror="false" includeemptydirs="true" />
+		<delete dir="${doc}" failonerror="false" includeemptydirs="true" />
 		<delete dir="${jar}" failonerror="false" includeemptydirs="true" />
 		<delete dir="${lib}" failonerror="false" includeemptydirs="true" />
-		<delete dir="${rslt}" failonerror="false" includeemptydirs="true" />
-		<delete dir="${doc}" failonerror="false" includeemptydirs="true" />
 		<mkdir dir="${bin}" />
+		<mkdir dir="${doc}" />
 		<mkdir dir="${jar}" />
 		<mkdir dir="${lib}" />
-		<mkdir dir="${rslt}" />
-		<mkdir dir="${doc}" />
 	</target>
 
 	<target name="ivy.prep" description="">
@@ -122,7 +111,7 @@
 	<target name="ivy.update_libs" depends="ivy.define" description="">
 		<ivy:settings id="settings" file="${bld}/ivysettings.xml" />
 		<ivy:resolve file="${bld}/ivy.xml" settingsRef="settings" conf="*" transitive="true" />
-		<ivy:report todir="${doc}/ivy_report" />
+		<ivy:report todir="${doc}/ivy_report" graph="false" />
 		<ivy:retrieve pattern="${lib}/[conf]/[artifact]-[revision].[ext]" sync="true" />
 	</target>
 
@@ -146,37 +135,7 @@
 		</delete>
 	</target>
 
-	<target name="clean_tests">
-		<delete includeemptydirs="true" verbose="true" >
-			<fileset dir="${tst}" includes="**/*.class" />
-		</delete>
-	</target>
-
-	<target name="clean_sql">
-		<delete includeemptydirs="true" verbose="true" >
-			<fileset dir="${sql}" includes="**/*.class" />
-		</delete>
-	</target>
-
-	<target name="clean_rslt">
-		<delete includeemptydirs="true" verbose="true" >
-			<fileset dir="${rslt}" includes="**/*" />
-		</delete>
-	</target>
-
-	<target name="clean_doc">
-		<delete includeemptydirs="true" verbose="true" >
-			<fileset dir="${doc}" includes="**/*" />
-		</delete>
-	</target>
-
-	<target name="clean_war">
-		<delete includeemptydirs="true" verbose="true" >
-			<fileset dir="${war}" includes="**/*" />
-		</delete>
-	</target>
-
-	<target name="clean" depends="clean_log,clean_ivy,clean_sonar,clean_bin,clean_jar,clean_war,clean_tests,clean_rslt,clean_doc" description=""/>
+	<target name="clean" depends="clean_log,clean_ivy,clean_sonar,clean_bin,clean_jar" description=""/>
 
 	<target name="compile" depends="clean_bin,log" description="">
 		<javac srcdir="${src}" includeantruntime="false" destdir="${bin}" includes="**/*.java">
@@ -188,27 +147,6 @@
 		<javac srcdir="${src}" includeantruntime="false" destdir="${bin}" debug="on" debuglevel="lines,vars,source" includes="**/*.java">
 			<classpath refid="classpath" />
 		</javac>
-	</target>
-
-	<target name="compile_tests" depends="clean_tests" description="">
-		<javac srcdir="${tst}" includeantruntime="false" destdir="${tst}" includes="**/*.java">
-			<classpath>
-				<path refid="classpath" />
-				<pathelement path="${bin}" />
-			</classpath>
-		</javac>
-	</target>
-
-	<target name="run_tests" description="">
-		<junit printsummary="withOutAndErr" haltonerror="true" haltonfailure="true" showoutput="true" logfailedtests="true">
-			<classpath>
-				<path refid="classpath" />
-				<pathelement path="${bin}" />
-				<pathelement path="${tst}" />
-			</classpath>
-			<formatter type="xml" />
-			<test name="${tests}" todir="${rslt}" />
-		</junit>
 	</target>
 
 	<target name="releasejar" if="is_ver_set" depends="clean_jar">
@@ -225,24 +163,7 @@
 		</jar>
 	</target>
 
-	<target name="war" depends="clean_war" description="">
-		<war destfile="${war}/${warbasename}${warextension}" webxml="${rsrc}/web.xml" needxmlfile="true" whenmanifestonly="fail" duplicate="fail">
-			<zipfileset dir="${lib}" includes="**/*.jar" excludes="**/tomcat*" prefix="WEB-INF/lib" />
-			<zipfileset dir="${jar}" includes="**/*.jar" prefix="WEB-INF/lib" />
-			<zipfileset dir="${rsrc}" includes="persistence.xml" prefix="WEB-INF/classes/META-INF" />
-		</war>
-	</target>
-
-	<target name="javadoc" depends="clean_doc" description="">
-		<javadoc destdir="${doc}" author="true" version="true" use="true" windowtitle="${ant.project.name} Documentation">
-			<fileset dir="${src}" />
-			<doctitle><![CDATA[<h1>${ant.project.name} Javadoc</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright &#169; 2017 John Tatum All Rights Reserved.</i>]]></bottom>
-			<link offline="true" href="https://docs.oracle.com/javase/8/docs/api/" packagelistLoc="C:\tmp" />
-		</javadoc>
-	</target>
-
 	<target name="build" depends="ivy.update_libs,compile,jar" description="" />
 
-	<target name="all" depends="prep,ivy.prep,ivy.download,ivy.update_libs,compile,compile_tests,run_tests,jar,war,javadoc" description="" />
+	<target name="all" depends="prep,ivy.prep,ivy.download,ivy.update_libs,compile,jar" description="" />
 </project>
