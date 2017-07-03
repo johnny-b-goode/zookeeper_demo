@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+    <settings defaultResolver="ofFools"/>
+    <resolvers>
+        <chain name="ofFools">
+            <ibiblio name="maven" m2compatible="true" root="http://central.maven.org/maven2/" />
+        </chain>
+    </resolvers>
+</ivysettings>
