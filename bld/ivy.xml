@@ -8,13 +8,6 @@
 	</configurations>
 
 	<dependencies defaultconf="compile">
-	<!--downloads 18 to compile, 2 to test-->
-		<!--exclude org="*" module="*" artifact="*doc*" />
-		<exclude org="*" module="*" artifact="*source*" /-->
-		<!--dependency org="org.apache.tomcat" name="tomcat-servlet-api" rev="8.5.16" conf="compile->default" /-->
 		<dependency org="org.apache.zookeeper" name="zookeeper" rev="3.4.10" conf="compile->default" />
-		<dependency org="com.google.code.gson" name="gson" rev="2.8.1" conf="compile->default" />
-		<dependency org="org.glassfish.jersey.containers" name="jersey-container-servlet-core" rev="2.25.1" conf="compile->default" />
-		<dependency org="junit" name="junit" rev="4.12" conf="test->default" />
 	</dependencies>
 </ivy-module>
